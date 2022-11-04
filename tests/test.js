@@ -95,12 +95,18 @@ describe("Check associations of tables", () => {
       expect(board.UserId).toBe(2);
     });
     test("a user can have many boards", async () => {
-      await addBoardToUser(2, "French");
-      await addBoardToUser(2, "English");
-      await addBoardToUser(2, "Italian");
+      const frenchBoard = await Board.findOne({ where: { type: "French" } });
+      const englishBoard = await Board.findOne({ where: { type: "English" } });
+      const italianBoard = await Board.findOne({ where: { type: "Italian" } });
       const user = await User.findByPk(2);
+      await user.addBoards([frenchBoard, englishBoard, italianBoard]);
       const userBoards = await user.getBoards();
       expect(userBoards.length).toBe(3);
+      expect(userBoards.map((el) => el.type)).toEqual([
+        "English",
+        "French",
+        "Italian",
+      ]);
     });
   });
   describe("Boards <-> Cheeses", () => {
@@ -111,12 +117,18 @@ describe("Check associations of tables", () => {
       expect(cheeseBoards.length).toBe(1);
     });
     test("a board can have many cheeses", async () => {
-      await addCheeseToBoard(1, "Wensleydale");
-      await addCheeseToBoard(1, "Cheddar");
-      await addCheeseToBoard(1, "Stilton");
+      const cheese1 = await Cheese.findOne({ where: { title: "Wensleydale" } });
+      const cheese2 = await Cheese.findOne({ where: { title: "Cheddar" } });
+      const cheese3 = await Cheese.findOne({ where: { title: "Stilton" } });
       const board = await Board.findByPk(1);
+      await board.addCheeses([cheese1, cheese2, cheese3]);
       const cheeseBoards = await board.getCheeses();
       expect(cheeseBoards.length).toBe(3);
+      expect(cheeseBoards.map((el) => el.title)).toEqual([
+        "Cheddar",
+        "Wensleydale",
+        "Stilton",
+      ]);
     });
     test("a cheese can be on many boards", async () => {
       await addCheeseToBoard(1, "Stilton");
